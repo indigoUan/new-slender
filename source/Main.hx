@@ -1,15 +1,13 @@
 package;
 
-import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
-import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
-import openfl.events.Event;
 import openfl.display.StageScaleMode;
+import openfl.events.Event;
 
 class Main extends Sprite
 {
@@ -21,6 +19,8 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var fpsVar:FPS;
+
+    public static var updateShaders:Array<Float->Void> = [];
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -73,6 +73,7 @@ class Main extends Sprite
 	
 		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+        FlxG.game.setFilters([Shaders.toCamera(new Shaders.CrtTv().shader)]);
 
 		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
@@ -89,4 +90,15 @@ class Main extends Sprite
 		FlxG.mouse.visible = false;
 		#end
 	}
+
+    public override function __enterFrame(deltaTime:Int) {
+        update(deltaTime * 0.001);
+        super.__enterFrame(deltaTime);
+    }
+
+    public function update(elapsed:Float) {
+        for (i in updateShaders) {
+            i(elapsed);
+        }
+    }
 }
